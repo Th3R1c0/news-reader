@@ -83,9 +83,9 @@ export default function ViewArticle({ params }) {
         <CardContent>
           <div className="flex flex-wrap  items-center gap-4 mb-6">
             <div className="flex items-center space-x-2 ">
-              <Label htmlFor="font-size">Font Size:</Label>
+              <Label htmlFor="font-size ">Font Size:</Label>
               <Select value={fontSize} onValueChange={setFontSize}>
-                <SelectTrigger id="font-size" className="w-[100px]">
+                <SelectTrigger id="font-size" className="w-[100px] h-max">
                   <SelectValue placeholder="Select size" />
                 </SelectTrigger>
                 <SelectContent>
@@ -94,14 +94,6 @@ export default function ViewArticle({ params }) {
                   <SelectItem value="lg">Large</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Label htmlFor="dark-mode">Dark Mode:</Label>
-              <Switch
-                id="dark-mode"
-                checked={isDarkMode}
-                onCheckedChange={setIsDarkMode}
-              />
             </div>
             <div className="flex items-center space-x-2">
               <Label>Word Count:</Label>

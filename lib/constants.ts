@@ -37,3 +37,9 @@ export const genreUrls:any = {
     { name: "International", icon: Globe2, color: "teal" },
   ];
   
+
+export const fontSizeClasses = {
+  sm: 'text-sm',
+  md: 'text-base',
+  lg: 'text-2xl',
+};

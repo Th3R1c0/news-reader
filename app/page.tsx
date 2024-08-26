@@ -55,17 +55,41 @@ function NewsItem({ title, link, pubDate, description }: any) {
   );
 }
 
-const fetcher = async (url: any) => {
-  const parser = new Parser();
-  const feed = await parser.parseURL(url);
-  return feed.items.map((item: any) => {
-    const match: any = item.link.match(/html\/(.+)\.html/);
-    const modifiedUrl = match ? match[1].replace('/', '-') : '';
-    return {
-      ...item,
-      url: modifiedUrl,
-    };
-  });
+const fetcher = async (url: string) => {
+  try {
+    // Make a POST request to the API with the URL in the body
+    const response = await fetch('/api/getArticle', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url }),
+    });
+
+    // Check if the response is OK
+    if (!response.ok) {
+      throw new Error('Failed to fetch data');
+    }
+
+    // Parse the response as JSON
+    const feed = await response.json();
+
+    // Map through items and modify URLs
+    return feed.items.map((item: any) => {
+      // Match and modify the URL
+      const match = item.link.match(/html\/(.+)\.html/);
+      const modifiedUrl = match ? match[1].replace('/', '-') : '';
+
+      // Return modified item
+      return {
+        ...item,
+        url: modifiedUrl,
+      };
+    });
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error; // Re-throw the error to be handled by SWR
+  }
 };
 
 export default function NewsFeed() {
@@ -120,7 +144,7 @@ export default function NewsFeed() {
         <p className="text-center">Loading...</p>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {content.map((item, i) => (
+          {content.map((item: any, i: any) => (
             <li key={i}>
               <Link href={`/article/${item.url}`}>
                 <NewsItem {...item} />

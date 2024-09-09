@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAutoAnimate } from '@formkit/auto-animate/react';
 import {
   Card,
   CardContent,
@@ -40,9 +41,20 @@ const fontSizeClasses = {
   md: "text-base",
   lg: "text-2xl",
 };
-function MultiChoiceQuizQuestion({ quizData, handleAnswerSelect, index, selectedanswer }) {
-  const [selectedAnswer, setSelectedAnswer] = useState(selectedanswer ? selectedanswer : null);
-  const [showExplanation, setShowExplanation] = useState(selectedanswer ? true : false);
+function MultiChoiceQuizQuestion({
+  quizData,
+  handleAnswerSelect,
+  index,
+  selectedanswer,
+}) {
+  const [selectedAnswer, setSelectedAnswer] = useState(
+    selectedanswer ? selectedanswer : null
+  );
+  const [showExplanation, setShowExplanation] = useState(
+    selectedanswer ? true : false
+  );
+
+  const [explanationRef] = useAutoAnimate();
 
   const handleAnswerClick = (answer) => {
     setSelectedAnswer(answer);
@@ -64,9 +76,11 @@ function MultiChoiceQuizQuestion({ quizData, handleAnswerSelect, index, selected
                 ? isCorrect
                   ? "default"
                   : "destructive"
+                : quizData.correctAnswer === answer && selectedAnswer !== null
+                ? "default" // Correct answer styling when a wrong answer is selected
                 : "outline"
             }
-            className="justify-start h-auto py-2 px-4"
+            className={`justify-start h-auto py-2 px-4`}
             disabled={selectedAnswer !== null}
           >
             {answer}
@@ -81,7 +95,7 @@ function MultiChoiceQuizQuestion({ quizData, handleAnswerSelect, index, selected
       </div>
 
       {showExplanation && (
-        <div className="mt-4 p-4 bg-muted rounded-md">
+        <div ref={explanationRef} className="mt-4 p-4 bg-muted rounded-md">
           <h3 className="font-semibold mb-2">説明:</h3>
           <p>{quizData.explanation}</p>
         </div>
@@ -110,6 +124,8 @@ export default function ViewArticle({ params }) {
   const [userAnswers, setUserAnswers] = useState({});
 
   const slug = params.slug.replace("-", "/");
+
+  const [questionsRef] = useAutoAnimate();
 
   useEffect(() => {
     const fetchArticleContent = async () => {
@@ -143,7 +159,6 @@ export default function ViewArticle({ params }) {
     setUserAnswers({});
   }, [slug]);
 
-
   const generateQuiz = async () => {
     setIsQuizLoading(true);
 
@@ -161,7 +176,6 @@ export default function ViewArticle({ params }) {
     });
 
     const { quiz } = await response.json();
-   
 
     setGeneratedQuestions(JSON.parse(quiz));
     setUserAnswers({});
@@ -192,12 +206,14 @@ export default function ViewArticle({ params }) {
       case "fill-in-the-blank":
         return <div>unfinished</div>;
       default:
-        return           <MultiChoiceQuizQuestion
-        handleAnswerSelect={handleAnswerSelect}
-        quizData={question}
-        index={index}
-        selectedanswer={userAnswers[index]} // Pass the selected answer
-      /> // Pass the selected answer
+        return (
+          <MultiChoiceQuizQuestion
+            handleAnswerSelect={handleAnswerSelect}
+            quizData={question}
+            index={index}
+            selectedanswer={userAnswers[index]} // Pass the selected answer
+          />
+        ); // Pass the selected answer
     }
   };
 
@@ -216,12 +232,12 @@ export default function ViewArticle({ params }) {
       <Tabs
         value={activeTab}
         onValueChange={setActiveTab}
-        className="space-y-4"
+        className="space-y-4 w-full"
       >
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid grid-cols-2 sticky w-full">
           <TabsTrigger
             value="text"
-            className="flex items-center justify-center space-x-2"
+            className="flex items-center justify-center space-x-2 "
           >
             <Book className="w-4 h-4" />
             <span>Article Text</span>
@@ -235,14 +251,14 @@ export default function ViewArticle({ params }) {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="text">
-          <Card className="mb-8">
+          <Card className="mb-8 p-6">
             <CardHeader>
               <CardTitle>
                 {isLoading ? <Skeleton className="w-3/4 h-9" /> : articleTitle}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap items-center gap-4 mb-6">
+              <div className="flex flex-wrap items-center  gap-4 mb-6">
                 <div className="flex items-center space-x-2 ">
                   <Label htmlFor="font-size ">Font Size:</Label>
                   <Select value={fontSize} onValueChange={setFontSize}>
@@ -292,7 +308,7 @@ export default function ViewArticle({ params }) {
                 <span>AI Quiz Generator</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6 " >
+            <CardContent className="space-y-6 ">
               <div className="grid gap-4 md:grid-cols-3 p-4">
                 <div className="space-y-2">
                   <Label
@@ -360,13 +376,18 @@ export default function ViewArticle({ params }) {
                   </Select>
                 </div>
               </div>
-              <Button
-                onClick={generateQuiz}
-                disabled={isQuizLoading}
-                className="w-full"
+              <div
+                className="max-w-4xl mx-auto flex justify-center"
+                style={{ padding: "1rem" }}
               >
-                Generate Quiz
-              </Button>
+                <Button
+                  onClick={generateQuiz}
+                  disabled={isQuizLoading}
+                  style={{ width: "36rem" }}
+                >
+                  Generate Quiz
+                </Button>
+              </div>
               {isQuizLoading ? (
                 <>
                   <Skeleton className="w-full h-4 mb-2" />
@@ -376,10 +397,40 @@ export default function ViewArticle({ params }) {
                 </>
               ) : (
                 generatedQuestions.questions.length > 0 && (
-                  <div className="mt-8 ">
-                    <div className="text-2xl font-semibold w-full h-max mb-4 flex items-center space-x-2">
-                      <PenLine className="w-6 h-6" />
-                      <span>Generated Questions</span>
+                  <div className="mt-8" ref={questionsRef}>
+                    <div className="text-2xl font-semibold w-full px-3 py-4 bg-muted flex justify-center gap-4">
+                      <div className="flex items-center">
+                        <PenLine className="w-6 h-6" />
+                        <span className="ml-2">Generated Questions</span>
+                      </div>
+                      <div className="flex gap-4">
+                        <div className="flex items-center">
+                          <CheckCircle2 className="h-4 w-4 text-green-500" />
+                          <span className="ml-2">
+                            {
+                              Object.values(userAnswers).filter(
+                                (answer, index) =>
+                                  answer ===
+                                  generatedQuestions.questions[index]
+                                    .correctAnswer
+                              ).length
+                            }
+                          </span>
+                        </div>
+                        <div className="flex items-center">
+                          <AlertCircle className="h-4 w-4 text-red-500" />
+                          <span className="ml-2">
+                            {
+                              Object.values(userAnswers).filter(
+                                (answer, index) =>
+                                  answer !==
+                                  generatedQuestions.questions[index]
+                                    .correctAnswer
+                              ).length
+                            }
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
                     {generatedQuestions.questions.map((q, index) => (
@@ -388,7 +439,7 @@ export default function ViewArticle({ params }) {
                         className="space-y-4 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-md"
                       >
                         <p className="text-lg font-medium">
-                          {index}. {q.question}
+                          {index + 1}. {q.question}
                         </p>
                         {RenderQuestion(q, index)}
 
@@ -409,3 +460,4 @@ export default function ViewArticle({ params }) {
     </div>
   );
 }
+

@@ -48,10 +48,10 @@ export default function NewsFeed() {
   return (
     <div className="container mx-auto px-4 py-8 ">
       <header className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-2">NHK News Feed</h1>
+        <h1 className="text-4xl font-bold mb-2">AI-Powered News Comprehension App</h1>
         <p className="text-xl text-muted-foreground">
-          Stay updated with the latest news from Japan
-        </p>
+          Read the news and take AI-generated quizzes to test your comprehension
+        </p> {/* Updated subtitle */}
       </header>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-6">
@@ -75,17 +75,18 @@ export default function NewsFeed() {
       <h2 className="text-2xl font-semibold mb-4">{selectedGenre} News</h2>
 
       {!content ? (
-        <LoadingSkeleton/>
+        <LoadingSkeleton />
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3  ">
           {content.map(
             ({ title, link, pubDate, description, url }: any, i: any) => (
-              <li key={i}>
+              <li key={i} className="">
                 <Link href={`/article/${url}`}>
                   <NewsItem
                     title={title}
-                    link={link}
+                    link={`/article/${url}`}
                     pubDate={pubDate}
+                    newslink={`/article/${url}`}
                     description={description}
                   />
                 </Link>

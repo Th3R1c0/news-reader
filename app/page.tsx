@@ -10,6 +10,7 @@ import { genreUrls, genres } from "@/lib/constants";
 import NewsItem from "@/components/newsitems";
 import { fetchRssFeed } from "@/lib/utils";
 import Footer from "@/components/footer";
+import { Pencil } from "lucide-react";
 
 
 
@@ -70,6 +71,16 @@ export default function NewsFeed() {
             <span>{genre.name}</span>
           </Badge>
         ))}
+                <Link href="/custom-quiz">
+                  <Badge
+                    key="custom"
+                    variant="outline"
+                    className={`flex items-center justify-center gap-1 cursor-pointer transition-colors bg-gradient-to-r from-pink-500 to-yellow-500 text-primary-foreground text-xs sm:text-sm py-2 px-3`}
+                  >
+                    <Pencil className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <span>Custom Text</span>
+                  </Badge>
+                </Link>
       </div>
 
       <h2 className="text-2xl font-semibold mb-4">{selectedGenre} News</h2>
